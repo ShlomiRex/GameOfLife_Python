@@ -4,7 +4,11 @@ from Life import Greedy
 
 if __name__ == "__main__":
     board = [[0, 1, 0], [0, 0, 1], [1, 1, 1], [0, 0, 0]]
-    Greedy.Life(board)
+    gameOfLife = Greedy.Life(board)
 
-    app = GUI()
+    neighbours = gameOfLife.getNumNeighbours(1, 1)
+    print(neighbours)
+
+    app = GUI(board)
     app.start()
+

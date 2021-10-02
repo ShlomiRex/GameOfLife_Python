@@ -1,46 +1,77 @@
 import pygame
 
+from Life.Greedy import Board
+
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
 WINDOW_WIDTH = 1600
 WINDOW_HEIGHT = 600
 
+GRID_COLOR = (100, 100, 100)
+CELL_COLOR = (255, 255, 255)
+
+Color = (int, int, int)
+
 
 class Grid:
-    def __init__(self, screen: pygame.Surface, block_size: int, block_border_girth: int, color: (int, int, int)):
+    def __init__(self, screen: pygame.Surface, block_size: int, block_border_girth: int, grid_color: Color, cell_color: Color, board: Board):
         self._screen = screen
         self._block_size = block_size
         self._border_width = block_border_girth
-        self._color = color
+        self._grid_color = grid_color
+        self._cell_color = cell_color
+        self._board = board
 
-    def draw(self):
+    def __draw_lines(self):
         # Draw horizontal lines
         for y in range(0, WINDOW_HEIGHT, self._block_size):
-            pygame.draw.line(self._screen, self._color, (0, y), (WINDOW_WIDTH, y), self._border_width)
+            pygame.draw.line(self._screen, self._grid_color, (0, y), (WINDOW_WIDTH, y), self._border_width)
 
         # Draw last line - horizontal
-        pygame.draw.line(self._screen, self._color, (0, WINDOW_HEIGHT - self._border_width),
+        pygame.draw.line(self._screen, self._grid_color, (0, WINDOW_HEIGHT - self._border_width),
                          (WINDOW_WIDTH, WINDOW_HEIGHT - self._border_width), self._border_width)
 
         # Draw vertical lines
         for x in range(0, WINDOW_WIDTH, self._block_size):
-            pygame.draw.line(self._screen, self._color, (x, 0), (x, WINDOW_WIDTH), self._border_width)
+            pygame.draw.line(self._screen, self._grid_color, (x, 0), (x, WINDOW_WIDTH), self._border_width)
 
         # Draw last line - vertical
-        pygame.draw.line(self._screen, self._color, (WINDOW_WIDTH - self._border_width, 0),
+        pygame.draw.line(self._screen, self._grid_color, (WINDOW_WIDTH - self._border_width, 0),
                          (WINDOW_WIDTH - self._border_width, WINDOW_HEIGHT), self._border_width)
+
+    def __draw_cell(self, x: int, y: int):
+        left = x * self._block_size
+        top = y * self._block_size
+        width = self._block_size
+        height = self._block_size
+
+        rect = pygame.Rect(left, top, width, height)
+        pygame.draw.rect(self._screen, self._cell_color, rect)
+
+    def __draw_cells(self):
+        _rect = pygame.Rect(300, 300, self._block_size, self._block_size)
+        pygame.draw.rect(self._screen, self._cell_color, _rect)
+
+        for i_row, row in enumerate(self._board):
+            for i_col, cell in enumerate(row):
+                if cell == 1:
+                    self.__draw_cell(i_col, i_row)
+
+    def draw(self):
+        self.__draw_lines()
+        self.__draw_cells()
 
 
 class GUI:
-    def __init__(self):
+    def __init__(self, board: Board):
         self._running = False
+        self._board = board
 
         self._screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         self._clock = pygame.time.Clock()
 
-        grid_color = (255, 255, 255)
-        self._grid = Grid(self._screen, 20, 1, grid_color)
+        self._grid = Grid(self._screen, 20, 1, GRID_COLOR, CELL_COLOR, board)
 
     def start(self):
         self._running = True
