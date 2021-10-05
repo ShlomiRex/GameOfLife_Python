@@ -1,5 +1,8 @@
+from copy import deepcopy
 from dataclasses import dataclass
 from typing import List
+
+from tabulate import tabulate
 
 Board = List[List[int]]
 
@@ -10,21 +13,15 @@ class Cell:
     x: int
     y: int
 
+def print_board(board: Board):
+    #print(tabulate(board, tablefmt="grid"))
+    print(tabulate(board))
+
 
 class Life:
     def __init__(self, board: Board):
         self._rows = len(board)
         self._cols = len(board[0])
-
-        # _board = []
-        # for row in range(self._rows):
-        #     _row = []
-        #     for col in range(self._cols):
-        #         cell = board[row][col]
-        #         _cell = Cell(cell == 1, col, row)
-        #         _row.append(_cell)
-        #     _board.append(row)
-        # self._board = _board
         self._board = board
 
     def __check_rules(self, x: int, y: int) -> bool:
@@ -37,7 +34,9 @@ class Life:
         # Rule 1:
         # Any live cell with fewer than two live neighbors dies as if caused by under-population.
         nn = self.__get_num_neighbours(x, y)
-        alive = (nn == 1)
+        print(f"Number of neighbours of: ({x}, {y}) is: {nn}")
+
+        alive = (self._board[y][x] == 1)
         if alive and nn < 2:
             return False
 
@@ -59,21 +58,58 @@ class Life:
         # Do nothing
         return alive
 
+    @staticmethod
+    def __zero_pad(_board: Board, _cols: int, _rows: int) -> (Board, int, int):
+        board = deepcopy(_board)
+
+        cols = _cols
+        rows = _rows
+
+        # Pad top
+        board.insert(0, [0] * cols)
+        rows += 1
+
+        # Pad bottom
+        board.append([0] * cols)
+        rows += 1
+
+        # Pad left + right
+        for row in board:
+            row.insert(0, 0)
+            row.append(0)
+        cols += 2
+
+        return board, cols, rows
+
     def __get_num_neighbours(self, x: int, y: int) -> int:
-        upper_row = self._board[y-1][x-1 : x+2]
-        middle_row = self._board[y][x-1 : x+2]
-        lower_row = self._board[y+1][x-1 : x+2]
+        zero_padded_board, cols, rows = self.__zero_pad(self._board, self._cols, self._rows)
+
+        # After padding, x,y position changed.
+        x = x + 1
+        y = y + 1
 
         alive_neighbours = 0
-        alive_neighbours += upper_row.count(1)
-        alive_neighbours += middle_row.count(1)
-        alive_neighbours += lower_row.count(1)
+        alive_neighbours += (zero_padded_board[y - 1][x - 1] == 1)
+        alive_neighbours += (zero_padded_board[y - 1][x] == 1)
+        alive_neighbours += (zero_padded_board[y - 1][x + 1] == 1)
 
-        middle_cell = self._board[y][x]
-        # If alive, we don't want to count him
-        if middle_cell == 1:
-            alive_neighbours -= 1
+        alive_neighbours += (zero_padded_board[y][x - 1] == 1)
+        alive_neighbours += (zero_padded_board[y][x + 1] == 1)
+
+        alive_neighbours += (zero_padded_board[y + 1][x - 1] == 1)
+        alive_neighbours += (zero_padded_board[y + 1][x] == 1)
+        alive_neighbours += (zero_padded_board[y + 1][x + 1] == 1)
 
         return alive_neighbours
 
+    def tick(self):
+        """
+        Initiate a single board tick. Updates the board.
+        :return:
+        """
+        for row in range(self._rows):
+            for col in range(self._cols):
+                alive = self.__check_rules(col, row)
+                self._board[row][col] = (1 if alive else 0)
+                #print(f"Changing ({col}, {row}) to: {self._board[row][col]}")
 
