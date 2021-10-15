@@ -38,11 +38,9 @@ class GUI:
         self._rows = rows
         self._cols = cols
         self._block_size = block_size
-
         self._grid_color = GRID_COLOR
         self._border_width = GRID_GIRTH
         self._cell_color = CELL_COLOR
-
         self._window_width = self._block_size * cols + GRID_GIRTH
         self._window_height = self._block_size * rows + GRID_GIRTH
         window_title = "Game of Life - by Shlomi Domnenko"
@@ -53,6 +51,13 @@ class GUI:
         # For text
         pygame.font.init()
         self._txt_font = pygame.font.SysFont(CELL_TEXT_FONT, CELL_TEXT_SIZE)
+
+    def inc_block_size(self):
+        self._block_size += 1
+
+    def dec_block_size(self):
+        if self._block_size > 1:
+            self._block_size -= 1
 
     def __draw_lines(self):
         # Draw horizontal lines

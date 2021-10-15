@@ -52,15 +52,25 @@ if __name__ == "__main__":
                 if event.type == pygame.QUIT:
                     running = False
             pressed = pygame.key.get_pressed()
+
+            # Up, down
             if pressed[pygame.K_w] or pressed[pygame.K_UP]:
                 app.start_y -= 1
             elif pressed[pygame.K_s] or pressed[pygame.K_DOWN]:
                 app.start_y += 1
 
+            # Left, right
             if pressed[pygame.K_a] or pressed[pygame.K_LEFT]:
                 app.start_x -= 1
             elif pressed[pygame.K_d] or pressed[pygame.K_RIGHT]:
                 app.start_x += 1
+
+            # Zoom in, out
+            if pressed[pygame.K_EQUALS]:
+                app.inc_block_size()
+            elif pressed[pygame.K_MINUS]:
+                app.dec_block_size()
+
             app.draw(cells)
             time.sleep(sleep)
             _tick_board = gameOfLife.tick()
