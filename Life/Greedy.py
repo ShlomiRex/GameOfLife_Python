@@ -1,28 +1,30 @@
-from copy import deepcopy
-from dataclasses import dataclass
+import itertools
 from typing import List
 
-from tabulate import tabulate
+"""
+Greedy algorithm.
+Trades memory for CPU time.
+Instead of storing giant board, like so:
+[ 
+    [0, 0, 0],
+    [0, 1, 0],
+    [1, 1, 0]
+]
+We only store the alive cells:
+[(1, 1), (2, 0), (2, 1)]
 
-Board = List[List[int]]
+For each tick we need to find neighbours for each cell.
+"""
 
-
-@dataclass
-class Cell:
-    alive: bool
-    x: int
-    y: int
-
-def print_board(board: Board):
-    #print(tabulate(board, tablefmt="grid"))
-    print(tabulate(board))
+Cells = List[tuple[int, int]]
 
 
 class Life:
-    def __init__(self, board: Board):
-        self._rows = len(board)
-        self._cols = len(board[0])
-        self._board = board
+    def __init__(self, cells: Cells, cols: int, rows: int):
+        self._rows = cols
+        self._cols = rows
+
+        self._cells = cells
 
     def __check_rules(self, x: int, y: int) -> bool:
         """
@@ -34,9 +36,9 @@ class Life:
         # Rule 1:
         # Any live cell with fewer than two live neighbors dies as if caused by under-population.
         nn = self.__get_num_neighbours(x, y)
-        print(f"Number of neighbours of: ({x}, {y}) is: {nn}")
 
-        alive = (self._board[y][x] == 1)
+        alive = (True if (x, y) in self._cells else False)
+
         if alive and nn < 2:
             return False
 
@@ -58,58 +60,51 @@ class Life:
         # Do nothing
         return alive
 
-    @staticmethod
-    def __zero_pad(_board: Board, _cols: int, _rows: int) -> (Board, int, int):
-        board = deepcopy(_board)
-
-        cols = _cols
-        rows = _rows
-
-        # Pad top
-        board.insert(0, [0] * cols)
-        rows += 1
-
-        # Pad bottom
-        board.append([0] * cols)
-        rows += 1
-
-        # Pad left + right
-        for row in board:
-            row.insert(0, 0)
-            row.append(0)
-        cols += 2
-
-        return board, cols, rows
-
     def __get_num_neighbours(self, x: int, y: int) -> int:
-        zero_padded_board, cols, rows = self.__zero_pad(self._board, self._cols, self._rows)
+        nn = 0
+        for _x, _y in self._cells:
+            if _x in (x-1, x, x+1) and _y in (y-1, y, y+1):
+                nn += 1
+        if (x, y) in self._cells:
+            nn -= 1
+        return nn
 
-        # After padding, x,y position changed.
-        x = x + 1
-        y = y + 1
+    def __get_neighbours(self, x, y):
+        n = [(x - 1, y - 1),
+             (x - 1, y),
+             (x - 1, y + 1),
+             (x, y - 1),
+             (x, y + 1),
+             (x + 1, y - 1),
+             (x + 1, y),
+             (x + 1, y + 1)]
 
-        alive_neighbours = 0
-        alive_neighbours += (zero_padded_board[y - 1][x - 1] == 1)
-        alive_neighbours += (zero_padded_board[y - 1][x] == 1)
-        alive_neighbours += (zero_padded_board[y - 1][x + 1] == 1)
-
-        alive_neighbours += (zero_padded_board[y][x - 1] == 1)
-        alive_neighbours += (zero_padded_board[y][x + 1] == 1)
-
-        alive_neighbours += (zero_padded_board[y + 1][x - 1] == 1)
-        alive_neighbours += (zero_padded_board[y + 1][x] == 1)
-        alive_neighbours += (zero_padded_board[y + 1][x + 1] == 1)
-
-        return alive_neighbours
+        return n
 
     def tick(self):
         """
         Initiate a single board tick. Updates the board.
         :return:
         """
-        for row in range(self._rows):
-            for col in range(self._cols):
-                alive = self.__check_rules(col, row)
-                self._board[row][col] = (1 if alive else 0)
-                #print(f"Changing ({col}, {row}) to: {self._board[row][col]}")
+        cells_going_alive = []
+
+        cells_to_check = self._cells.copy()
+
+        for x, y in self._cells:
+            neighbours = self.__get_neighbours(x, y)
+            for neighbour in neighbours:
+                cells_to_check.append(neighbour)
+
+        # Remove duplicates
+        cells_to_check = list(set(cells_to_check))
+
+        for x, y in cells_to_check:
+            alive = self.__check_rules(x, y)
+            if alive:
+                cells_going_alive.append((x, y))
+        self._cells.clear()
+        for cell in cells_going_alive:
+            self._cells.append(cell)
+
+
 
