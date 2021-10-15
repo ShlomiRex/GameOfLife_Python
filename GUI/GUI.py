@@ -6,15 +6,14 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
 # Changes these variables to change screen size
+DRAW_GRID = False
 BLOCK_SIZE = 10
-
 GRID_GIRTH = 2
-
 GRID_COLOR = (100, 100, 100)
 CELL_COLOR = (255, 255, 255)
 
 # OPTIONAL
-CELL_TEXT = False
+DRAW_CELL_TEXT = False
 CELL_TEXT_FONT = 'Comic Sans MS'
 CELL_TEXT_SIZE = 11
 CELL_TEXT_COLOR = BLACK
@@ -61,7 +60,7 @@ class GUI:
         rect = pygame.Rect(left, top, width, height)
         pygame.draw.rect(self._screen, self._cell_color, rect)
 
-        if CELL_TEXT:
+        if DRAW_CELL_TEXT:
             text = f"({x},{y})"
             text_surface = self._txt_font.render(text, True, CELL_TEXT_COLOR, CELL_TEXT_BACKGROUND)
             self._screen.blit(text_surface, (left, top))
@@ -72,6 +71,7 @@ class GUI:
 
     def draw(self, cells: Cells):
         self._screen.fill(BLACK)
-        self.__draw_lines()
+        if DRAW_GRID:
+            self.__draw_lines()
         self.__draw_cells(cells)
         pygame.display.flip()

@@ -37,6 +37,19 @@ class Glider(LifePattern):
         super().__init__(3, 3, cells, top, left)
 
 
+class Pentadecathlon(LifePattern):
+    def __init__(self, top, left):
+        cells = [(3, 2), (4, 2), (5, 2),
+                 (4, 3), (4, 4),
+                 (3, 5), (4, 5), (5, 5),
+
+                 (3, 7), (4, 7), (5, 7),
+                 (3, 8), (4, 8), (5, 8),
+
+                 (3, 10), (4, 10), (5, 10),
+                 (4, 11), (4, 12),
+                 (3, 13), (4, 13), (5, 13)]
+        super().__init__(9, 16, cells, top, left)
 
 
 
