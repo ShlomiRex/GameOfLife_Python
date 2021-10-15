@@ -10,10 +10,7 @@ FORMAT = '%(levelname)s:%(message)s'
 logging.basicConfig(format=FORMAT, level=logging.INFO)
 logger = logging.getLogger('GameOfLife')
 
-if __name__ == "__main__":
-    rows = 50
-    cols = 50
-
+def init_board():
     block = Patterns.Block(1, 1)
     blinker = Patterns.Blinker(10, 5)
     toad = Patterns.Toad(2, 10)
@@ -30,9 +27,20 @@ if __name__ == "__main__":
     cells.extend(penta.cells)
     cells.extend(blinker2.cells)
 
+    return cells
+
+if __name__ == "__main__":
+    rows = 50
+    cols = 50
+    star_x = -15
+    start_y = -15
+    block_size = 10
+
+    cells = init_board()
+
     gameOfLife = Greedy.Life(cells, cols, rows)
 
-    app = GUI(rows, cols)
+    app = GUI(rows, cols, star_x, start_y, block_size)
 
     running = True
     try:
@@ -40,8 +48,17 @@ if __name__ == "__main__":
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
+            pressed = pygame.key.get_pressed()
+            if pressed[pygame.K_w] or pressed[pygame.K_UP]:
+                app.start_y += 1
+            elif pressed[pygame.K_s] or pressed[pygame.K_DOWN]:
+                app.start_y -= 1
+            elif pressed[pygame.K_a] or pressed[pygame.K_LEFT]:
+                app.start_x += 1
+            elif pressed[pygame.K_d] or pressed[pygame.K_RIGHT]:
+                app.start_x -= 1
             app.draw(cells)
-            sleep(0.1)
+            sleep(0.5)
             _tick_board = gameOfLife.tick()
     except KeyboardInterrupt:
         running = False
