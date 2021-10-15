@@ -1,5 +1,5 @@
 import logging
-from time import sleep
+import time
 
 import pygame
 
@@ -16,6 +16,7 @@ def init_board():
     toad = Patterns.Toad(2, 10)
     glider = Patterns.Glider(10, 10)
     penta = Patterns.Pentadecathlon(20, 20)
+    pulsar = Patterns.Pulsar(-20, -20)
 
     blinker2 = Patterns.Blinker(0, 5)
 
@@ -25,7 +26,8 @@ def init_board():
     cells.extend(toad.cells)
     cells.extend(glider.cells)
     cells.extend(penta.cells)
-    cells.extend(blinker2.cells)
+    #cells.extend(blinker2.cells)
+    cells.extend(pulsar.cells)
 
     return cells
 
@@ -35,6 +37,7 @@ if __name__ == "__main__":
     star_x = -15
     start_y = -15
     block_size = 10
+    sleep = 0.1
 
     cells = init_board()
 
@@ -50,15 +53,16 @@ if __name__ == "__main__":
                     running = False
             pressed = pygame.key.get_pressed()
             if pressed[pygame.K_w] or pressed[pygame.K_UP]:
-                app.start_y += 1
-            elif pressed[pygame.K_s] or pressed[pygame.K_DOWN]:
                 app.start_y -= 1
-            elif pressed[pygame.K_a] or pressed[pygame.K_LEFT]:
-                app.start_x += 1
-            elif pressed[pygame.K_d] or pressed[pygame.K_RIGHT]:
+            elif pressed[pygame.K_s] or pressed[pygame.K_DOWN]:
+                app.start_y += 1
+
+            if pressed[pygame.K_a] or pressed[pygame.K_LEFT]:
                 app.start_x -= 1
+            elif pressed[pygame.K_d] or pressed[pygame.K_RIGHT]:
+                app.start_x += 1
             app.draw(cells)
-            sleep(0.5)
+            time.sleep(sleep)
             _tick_board = gameOfLife.tick()
     except KeyboardInterrupt:
         running = False
